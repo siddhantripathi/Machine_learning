@@ -1,0 +1,98 @@
+from queue import PriorityQueue
+import heapq
+
+
+cost =     [[0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0], 
+            [0,  0,  5,  9, -1,  6, -1, -1, -1, -1, -1],
+            [0, -1,  0,  3, -1, -1,  9, -1, -1, -1, -1], 
+            [0, -1,  2,  0,  1, -1, -1, -1, -1, -1, -1],
+            [0,  6, -1, -1,  0, -1, -1,  5,  7, -1, -1],
+            [0, -1, -1, -1,  2,  0, -1, -1, -1,  2, -1],
+            [0, -1, -1, -1, -1, -1,  0, -1, -1, -1, -1],
+            [0, -1, -1, -1, -1, -1, -1,  0, -1, -1, -1],
+            [0, -1, -1, -1, -1,  2, -1, -1,  0, -1,  8],
+            [0, -1, -1, -1, -1, -1, -1, -1, -1,  0,  7],
+            [0, -1, -1, -1, -1, -1, -1, -1, -1, -1,  0]]
+heuristic=  [0,  5,  7,  3,  4,  6,  0,  0,  6,  5,  0]
+
+def A_star_Traversal(cost,start,goal,heuristic):
+    if start in goal:
+        return [start]
+    l=[]
+    visited=[]
+    list=[]
+    heapq.heappush(list,(heuristic[start],start,[start]))
+    while(list):
+        node=heapq.heappop(list)
+        if node[1] in goal:
+            l=node[2]
+            break
+        if(node[1] not in visited):
+            for i in range(1,len(cost[node[1]])):
+                if(cost[node[1]][i]!=-1):
+                    heapq.heappush(list,(node[0]+cost[node[1]][i]-heuristic[node[2][-1]]+heuristic[i],i,node[2]+[i]))
+        visited.append(node[1])
+    return l
+
+def UCS_Traversal(
+    cost,start,goal
+):
+    l=[]
+    visited=[]
+    list=[]
+    heapq.heappush(list,(0,start,[start]))
+    while(list):
+        node=heapq.heappop(list)
+        if node[1] in goal:
+            l=node[2]
+            break
+        if(node[1] not in visited):
+            for i in range(1,len(cost[node[1]])):
+                if(cost[node[1]][i]!=-1):
+                    heapq.heappush(list,(node[0]+cost[node[1]][i],i,node[2]+[i]))
+        visited.append(node[1])
+    return l
+
+def DFS_Traversal(
+    Graph,start,goal
+):
+    stack=[(start,[start])]
+    if start in goal:
+        return []
+    while stack:
+        (v,a)=stack.pop()
+        for next in Graph[v]-set(a):
+            if next in goal:
+                yield a+[next]
+            else:
+                stack.append((next,a+[next]))
+
+def makeGraph(cost):
+    Graph={}
+    for i in range(len(cost)):
+        Graph[i]=set()
+        for j in range(len(cost)):
+            if cost[i][j]>0:
+                Graph[i].add(j)
+    return Graph
+
+
+
+def tri_traversal(cost, heuristic, start_point, goals):
+    l = []
+    Graph=makeGraph(cost)
+
+    t1 = list(DFS_Traversal(
+    Graph,start_point,goals
+))
+    t2 = UCS_Traversal(
+    cost,start_point,goals
+)
+    t3 = A_star_Traversal(
+    cost,start_point,goals,heuristic 
+)
+
+    l.append(min(t1))
+    l.append(t2)
+    l.append(t3)
+    return l
